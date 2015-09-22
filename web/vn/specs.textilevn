@@ -1,0 +1,317 @@
+---
+prev: coll2.textile
+next: concurrency.textile
+title: Testing with specs
+layout: post
+---
+
+Bài học sẽ hướng dẫn một số phương pháp kiểm thử bằng Specs - một Dehavior-Driven Design (BDD) Framework cho Scala.
+
+* "kế thừa lớp Specification":#example
+** nested examples
+* "Mô hình thực thi - Execution Model":#scope
+* "Cài dặt và gỡ bõ - Setup and TearDown":#setup
+** doFirst
+** doBefore
+** doAfter
+* "Matchers":#matchers
+** mustEqual
+** contains
+** sameSize?
+** Viết Matchers của riêng bạn
+* "Mocks":#mocks
+* "Spies":#spies
+* "thực thi với sbt":#sbt
+
+
+h2(#example). Kế thừa lớp Specification
+
+Ta hãy bắt đầu với ví dụ dưới đây.
+
+<pre>
+import org.specs._
+
+object ArithmeticSpec extends Specification {
+  "Arithmetic" should {
+    "add two numbers" in {
+      1 + 1 mustEqual 2
+    }
+    "add three numbers" in {
+      1 + 1 + 1 mustEqual 3
+    }
+  }
+}
+</pre>
+
+*Lưu ý* các thuật ngữ dưới đây là các từ chuyên môn của BDD, vì vậy tôi sẽ để nguyên để bạn đọc tiện theo dõi.
+*Arithmetic* là *System Under Specification*
+
+*add* là một context.
+
+*add two numbers* và *add three numbers* là các examples.
+
+@mustEqual@ là hàm so sánh với *giá trị mong muốn (expectation)*
+
+@1 mustEqual 1@ là một ví dụ đơn giản nhất để bắt đầu viết các mã kiểm thử. Với Specs, tất cả các example phải có ít nhất một expectation.
+
+h3. Duplication
+
+Như ví dụ trên, ta thấy trong cả 2 example đều có chứa từ khoá @add@, ta có thể lược bỏ nó bằng cách lồng các expectation với nhau.
+
+<pre>
+import org.specs._
+
+object ArithmeticSpec extends Specification {
+  "Arithmetic" should {
+    "add" in {
+      "two numbers" in {
+        1 + 1 mustEqual 2
+      }
+      "three numbers" in {
+        1 + 1 + 1 mustEqual 3
+      }
+    }
+  }
+}
+</pre>
+
+h2(#scope). Mô hình thực thi (Execution Model)
+
+<pre>
+object ExecSpec extends Specification {
+  "Mutations are isolated" should {
+    var x = 0
+    "x equals 1 if we set it." in {
+      x = 1
+      x mustEqual 1
+    }
+    "x is the default value if we don't change it" in {
+      x mustEqual 0
+    }
+  }
+}
+</pre>
+
+h2(#setup). Cài đăt và gỡ bỏ (Setup, Teardown)
+
+h3. doBefore & doAfter
+
+<pre>
+"my system" should {
+  doBefore { resetTheSystem() /** user-defined reset function */ }
+  "mess up the system" in {...}
+  "and again" in {...}
+  doAfter { cleanThingsUp() }
+}
+</pre>
+
+*CHÚ Ý* @doBefore@/@doAfter@ chỉ thực thi trên các example cuối cùng (leaf examples).
+
+h3. doFirst & doLast
+
+@doFirst@/@doLast@ được sử dụng cho việc cài đặt một lần duy nhất (single-time setup). (phần này cần các ví dụ, tôi không sử dụng cái này)
+
+<pre>
+"Foo" should {
+  doFirst { openTheCurtains() }
+  "test stateless methods" in {...}
+  "test other stateless methods" in {...}
+  doLast { closeTheCurtains() }
+}
+</pre>
+
+h2(#matchers). Matchers
+
+Khi kiểm thử chương trình, bạn cần chắc chắn rằng các dữ liệu là hợp lệ. Dưới đây sẽ là một số ví dụ cơ bản nhất về việc sử dụng matcher. (Xem thêm "Matchers Guide":http://code.google.com/p/specs/wiki/MatchersGuide)
+
+h3. mustEqual
+
+Chúng ta đã có rất nhiều các ví dụ về việc sử dụng mustEqual.
+
+<pre>
+1 mustEqual 1
+
+"a" mustEqual "a"
+</pre>
+
+Như trên, là 2 ví dụ về việc so sánh tham chiếu và so sánh giá trị.
+
+h3. các thành phần trong một Sequence
+
+<pre>
+val numbers = List(1, 2, 3)
+
+numbers must contain(1)
+numbers must not contain(4)
+
+numbers must containAll(List(1, 2, 3))
+numbers must containInOrder(List(1, 2, 3))
+
+List(1, List(2, 3, List(4)), 5) must haveTheSameElementsAs(List(5, List(List(4), 2, 3), 1))
+</pre>
+
+
+h3. Items trong Map
+
+<pre>
+map must haveKey(k)
+map must notHaveKey(k)
+
+map must haveValue(v)
+map must notHaveValue(v)
+</pre>
+
+h3. Số
+
+<pre>
+a must beGreaterThan(b)
+a must beGreaterThanOrEqualTo(b)
+
+a must beLessThan(b)
+a must beLessThanOrEqualTo(b)
+
+a must beCloseTo(b, delta)
+</pre>
+
+
+h3. Kiểu Option
+
+<pre>
+a must beNone
+
+a must beSome[Type]
+
+a must beSomething
+
+a must beSome(value)
+</pre>
+
+h3. throwA (Ngoại lệ)
+
+<pre>
+a must throwA[WhateverException]
+</pre>
+
+Cú pháp trên ngắn gọn hơn nhiều so với việc sử dụng try catch với fail trong thân của chương trình kiểm thử.
+
+Bạn cũng có thể kiểm tra một thông điệp cụ thể của ngoại lệ:
+
+<pre>
+a must throwA(WhateverException("message"))
+</pre>
+
+Và tất nhiên bạn cũng có thể sử dụng so khớp mẫu (pattern matching) với các ngoại lệ:
+
+<pre>
+a must throwA(new Exception) like {
+  case Exception(m) => m.startsWith("bad")
+}
+</pre>
+
+
+h3. Viết Matchers của riêng bạn
+
+<pre>
+import org.specs.matcher.Matcher
+</pre>
+
+h4. Khai báo bằng val
+
+<pre>
+"A matcher" should {
+  "be created as a val" in {
+    val beEven = new Matcher[Int] {
+      def apply(n: => Int) = {
+        (n % 2 == 0, "%d is even".format(n), "%d is odd".format(n))
+      }
+    }
+    2 must beEven
+  }
+}
+</pre>
+
+Quy ước như trên sẽ tả về một tuple chứa điều kiện để expectation là hợp lệ, thông điệp khi biểu thức kiểm tra hợp lệ và không.
+
+h4. Khai báo bằng case class
+
+<pre>
+case class beEven(b: Int) extends Matcher[Int]() {
+  def apply(n: => Int) =  (n % 2 == 0, "%d is even".format(n), "%d is odd".format(n))
+}
+</pre>
+
+Việc khai báo bằng case class giúp tăng khả năng tái sử dụng của matcher.
+
+h2(#mocks). Mocks
+
+<pre>
+import org.specs.Specification
+import org.specs.mock.Mockito
+
+class Foo[T] {
+  def get(i: Int): T
+}
+
+object MockExampleSpec extends Specification with Mockito {
+  val m = mock[Foo[String]]
+
+  m.get(0) returns "one"
+
+  m.get(0)
+
+  there was one(m).get(0)
+
+  there was no(m).get(1)
+}
+</pre>
+
+*Xem thêm* "Using Mockito":http://code.google.com/p/specs/wiki/UsingMockito
+
+h2(#spies). Spies
+
+Trong dối tượng thực tế, Spy được sử dụng để "mock một phần (partial mocking)":
+
+<pre>
+val list = new LinkedList[String]
+val spiedList = spy(list)
+
+// phương thức có thể được giả lập hoá (stub) bằng spy
+spiedList.size returns 100
+
+// các phương thức khác vẫn có thể được sử dụng bình thường
+spiedList.add("one")
+spiedList.add("two")
+
+// và việc kiểm tra có thể được diễn tra trên spy
+there was one(spiedList).add("one")
+</pre>
+
+Tuy nhiên, làm việc với spy có một số vấn đề như sau:
+
+<pre>
+// nếu list rỗng, dòng lệnh dưới đây sẽ throw IndexOutOfBoundsException
+spiedList.get(0) returns "one"
+</pre>
+
+trong trường hợp này ta buộc phải sử dụng @doReturn@:
+
+<pre>
+doReturn("one").when(spiedList).get(0)
+</pre>
+
+
+h2(#sbt). Thực thi một spec cụ thể với sbt
+
+
+<pre>
+> test-only com.twitter.yourservice.UserSpec
+</pre>
+
+Sẽ chỉ thực thi spec đã được chỉ định.
+
+
+<pre>
+> ~ test-only com.twitter.yourservice.UserSpec
+</pre>
+
+Sẽ thực thi spec theo một vòng lặp, cứ mỗi khi file bị thay đổi, chương trình kiểm thử sẽ thực thi.
