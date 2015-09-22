@@ -134,7 +134,7 @@ Chúng ta đã có rất nhiều các ví dụ về việc sử dụng mustEqual
 "a" mustEqual "a"
 </pre>
 
-Như trên, là 2 ví dụ về việc so sánh tham chiếu và so sánh giá trị.
+@mustEqual@ sẽ thực hiện so sánh bằng với tham chiếu và giá trị của biến với expectation.
 
 h3. các thành phần trong một Sequence
 
