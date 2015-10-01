@@ -43,20 +43,20 @@ object ArithmeticSpec extends Specification {
 }
 </pre>
 
-*Lưu ý* các thuật ngữ dưới đây là các từ chuyên môn của BDD, vì vậy tôi sẽ để nguyên để bạn đọc tiện theo dõi.
+*Lưu ý* các thuật ngữ dưới đây là các từ chuyên môn của BDD, vì vậy tôi sẽ để song ngữ để bạn đọc tiện theo dõi.
 *Arithmetic* là *System Under Specification*
 
-*add* là một context.
+*add* là một ngữ cảnh (context).
 
-*add two numbers* và *add three numbers* là các examples.
+*add two numbers* và *add three numbers* là các ví dụ (example).
 
-@mustEqual@ là hàm so sánh với *giá trị mong muốn (expectation)*
+@mustEqual@ là biểu thức so khớp giá trị cần kiểm tra với *giá trị mong muốn (expectation)*
 
-@1 mustEqual 1@ là một ví dụ đơn giản nhất để bắt đầu viết các mã kiểm thử. Với Specs, tất cả các example phải có ít nhất một expectation.
+@1 mustEqual 1@ là một ví dụ đơn giản nhất để bắt đầu viết các mã kiểm thử. Với Specs, tất cả các ví dụ phải có ít nhất một biểu thức so khớp.
 
 h3. Duplication
 
-Như ví dụ trên, ta thấy trong cả 2 example đều có chứa từ khoá @add@, ta có thể lược bỏ nó bằng cách lồng các expectation với nhau.
+Như ví dụ trên, ta thấy trong cả 2 ví dụ đều có chứa từ khoá @add@, ta có thể lược bỏ nó bằng nested examples như dưới đây.
 
 <pre>
 import org.specs._
@@ -105,7 +105,7 @@ h3. doBefore & doAfter
 }
 </pre>
 
-*CHÚ Ý* @doBefore@/@doAfter@ chỉ thực thi trên các example cuối cùng (leaf examples).
+*CHÚ Ý* @doBefore@/@doAfter@ chỉ thực thi trên các ví dụ cuối cùng (leaf examples).
 
 h3. doFirst & doLast
 
@@ -134,7 +134,7 @@ Chúng ta đã có rất nhiều các ví dụ về việc sử dụng mustEqual
 "a" mustEqual "a"
 </pre>
 
-@mustEqual@ sẽ thực hiện so sánh bằng với tham chiếu và giá trị của biến với expectation.
+@mustEqual@ sẽ thực hiện so sánh bằng với tham chiếu và giá trị của biến với giá trị mong muốn.
 
 h3. các thành phần trong một Sequence
 
