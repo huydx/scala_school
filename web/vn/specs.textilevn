@@ -5,7 +5,7 @@ title: Testing with specs
 layout: post
 ---
 
-Bài học sẽ hướng dẫn một số phương pháp kiểm thử bằng Specs - một Dehavior-Driven Design (BDD) Framework cho Scala.
+Bài học sẽ hướng dẫn một số phương pháp kiểm thử bằng Specs - bộ thư viện dành cho thiết kế hướng hành vi (Behaviour-Driven Design).
 
 * "kế thừa lớp Specification":#example
 ** nested examples
@@ -230,7 +230,7 @@ h4. Khai báo bằng val
 }
 </pre>
 
-Quy ước như trên sẽ tả về một tuple chứa điều kiện để expectation là hợp lệ, thông điệp khi biểu thức kiểm tra hợp lệ và không.
+Quy ước như trên sẽ trả về cho ta một tuple chứa điều kiện để biểu thức so khớp là đúng kèm với các thông điệp (khi biểu thức so khớp là đúng hoặc sai).
 
 h4. Khai báo bằng case class
 
