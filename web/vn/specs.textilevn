@@ -44,7 +44,7 @@ object ArithmeticSpec extends Specification {
 </pre>
 
 *Lưu ý* các thuật ngữ dưới đây là các từ chuyên môn của BDD, vì vậy tôi sẽ để song ngữ để bạn đọc tiện theo dõi.
-*Arithmetic* là *System Under Specification*
+*Arithmetic* là *Hệ thống mà chúng ta chuẩn bị mô tả*
 
 *add* là một ngữ cảnh (context).
 
